@@ -1,0 +1,18 @@
+{
+  "name": "ms-alertas-urbannav",
+  "version": "1.0.0",
+  "description": "microservicio de alertas para el aplicativo de urbannav usando webscoket",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Cristian Camilo Osorio Granada",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "http": "^0.0.1-security",
+    "cors": "^2.8.5"
+  }
+}
