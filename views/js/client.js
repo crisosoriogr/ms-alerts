@@ -1,4 +1,9 @@
-const socket = io("http://localhost:7000", { query: { type: "client" } });
+//const socket = io("http://localhost:7000", { query: { type: "client" } });
+//const socketDrivers = io("http://localhost:6500", { query: { type: "driver" } });
+
+const socket = io("/users", { query: { type: "client" } });
+const socketDrivers = io("/drivers", { query: { type: "driver" } })
+
 
 let fileURL;
 

@@ -1,40 +1,30 @@
-
-express = require("express");
+const express = require("express");
 const app = express();
 const path = require("path");
-const cors = require("cors");  
+const cors = require("cors");
 const socketIo = require("socket.io");
-
 
 const server = require("http").createServer(app);
 
 const io = socketIo(server, {
   cors: {
     origin: "http://127.0.0.1:7000",
-    credentials: true
-  }
+    credentials: true,
+  },
 });
-
 
 const PORT = process.env.PORT || 7000;
 const list_users = {};
-
-
+const list_drivers = {};
 
 app.use(express.static(path.join(__dirname, "views")));
 
-server.listen(PORT, () => {
-  console.log(
-    "-+-+-+-+- Servidor iniciado -+-+-+-+-+-\n" +
-      " -+-+-+- http://127.0.0.1:" +
-      PORT +
-      " -+-+-+-"
-  );
-});
+const userNamespace = io.of("/users");
+const driverNamespace = io.of("/drivers");
 
-io.on("connection", (socket) => {
+userNamespace.on("connection", (socket) => {
+  console.log(`The user ${socket.id} has joined the chat as a user of type ${socket.handshake.query.type}`);
 
- console.log(`The user ${socket.id} has joined the chat as an user of type ${socket.handshake.query.type}`)
   socket.on("register", (nickname) => {
     if (list_users[nickname]) {
       socket.emit("userExists");
@@ -43,34 +33,88 @@ io.on("connection", (socket) => {
       list_users[nickname] = socket.id;
       socket.nickname = nickname;
       socket.emit("login");
-      io.emit("activeSessions", list_users);
+      userNamespace.emit("activeSessions", list_users);
     }
   });
 
   socket.on("disconnect", () => {
     delete list_users[socket.nickname];
-    console.log(`The user ${list_users[socket.nickname]} has left the chat.`)
-    io.emit("activeSessions", list_users);
+    console.log(`The user ${list_users[socket.nickname]} has left the chat.`);
+    userNamespace.emit("activeSessions", list_users);
   });
 
   socket.on("sendMessage", ({ message, image }) => {
-    io.emit("sendMessage", { message, user: socket.nickname, image });
+    userNamespace.emit("sendMessage", { message, user: socket.nickname, image });
   });
 
   socket.on("sendMessagesPrivate", ({ message, image, selectUser }) => {
     if (list_users[selectUser]) {
-      io.to(list_users[selectUser]).emit("sendMessage", {
+      userNamespace.to(list_users[selectUser]).emit("sendMessage", {
         message,
         user: socket.nickname,
         image,
       });
-      io.to(list_users[socket.nickname]).emit("sendMessage", {
+      userNamespace.to(list_users[socket.nickname]).emit("sendMessage", {
         message,
         user: socket.nickname,
         image,
       });
     } else {
-      alert("El usuario al que intentas enviar el mensaje no existe!");
+      // Puedes emitir un evento de error en lugar de usar alert en el servidor
+      socket.emit("error", "El usuario al que intentas enviar el mensaje no existe!");
     }
   });
+});
+
+driverNamespace.on("connection", (socketDrivers) => {
+  console.log(`The driver ${socketDrivers.id} has joined the chat as a driver of type ${socketDrivers.handshake.query.type}`);
+
+  socketDrivers.on("register", (nickname) => {
+    if (list_drivers[nickname]) {
+      socketDrivers.emit("userExists");
+      return;
+    } else {
+      list_drivers[nickname] = socketDrivers.id;
+      socketDrivers.nickname = nickname;
+      socketDrivers.emit("login");
+      driverNamespace.emit("activeSessions", list_drivers);
+    }
+  });
+
+  socketDrivers.on("disconnect", () => {
+    delete list_drivers[socketDrivers.nickname];
+    console.log(`The driver ${list_drivers[socketDrivers.nickname]} has left the chat.`);
+    driverNamespace.emit("activeSessions", list_drivers);
+  });
+
+  socketDrivers.on("sendMessage", ({ message, image }) => {
+    driverNamespace.emit("sendMessage", { message, user: socketDrivers.nickname, image });
+  });
+
+  socketDrivers.on("sendMessagesPrivate", ({ message, image, selectUser }) => {
+    if (list_drivers[selectUser]) {
+      driverNamespace.to(list_drivers[selectUser]).emit("sendMessage", {
+        message,
+        user: socketDrivers.nickname,
+        image,
+      });
+      driverNamespace.to(list_drivers[socketDrivers.nickname]).emit("sendMessage", {
+        message,
+        user: socketDrivers.nickname,
+        image,
+      });
+    } else {
+      // Puedes emitir un evento de error en lugar de usar alert en el servidor
+      socketDrivers.emit("error", "El conductor al que intentas enviar el mensaje no existe!");
+    }
+  });
+});
+
+server.listen(PORT, () => {
+  console.log(
+    "-+-+-+-+- Servidor iniciado -+-+-+-+-+-\n" +
+    " -+-+-+- http://127.0.0.1:" +
+    PORT +
+    " -+-+-+-"
+  );
 });
