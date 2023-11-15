@@ -1,20 +1,25 @@
 
 express = require("express");
 const app = express();
-const server = require("http").createServer(app);
-const io = require("socket.io")(server);
 const path = require("path");
 const cors = require("cors");  
+const socketIo = require("socket.io");
+
+
+const server = require("http").createServer(app);
+
+const io = socketIo(server, {
+  cors: {
+    origin: "http://127.0.0.1:7000",
+    credentials: true
+  }
+});
+
 
 const PORT = process.env.PORT || 7000;
 const list_users = {};
 
 
- 
-
- 
- 
-app.use(cors());
 
 app.use(express.static(path.join(__dirname, "views")));
 
@@ -29,7 +34,7 @@ server.listen(PORT, () => {
 
 io.on("connection", (socket) => {
 
- 
+ console.log(`The user ${socket.id} has joined the chat as an user of type ${socket.handshake.query.type}`)
   socket.on("register", (nickname) => {
     if (list_users[nickname]) {
       socket.emit("userExists");

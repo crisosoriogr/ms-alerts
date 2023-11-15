@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io("http://localhost:7000", { query: { type: "client" } });
 
 let fileURL;
 

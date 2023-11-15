@@ -10,9 +10,9 @@
   "author": "Cristian Camilo Osorio Granada",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "socket.io": "^4.7.2",
     "http": "^0.0.1-security",
-    "cors": "^2.8.5"
+    "socket.io": "^4.7.2"
   }
 }
