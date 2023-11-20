@@ -1,8 +1,7 @@
-//const socket = io("http://localhost:7000", { query: { type: "client" } });
-//const socketDrivers = io("http://localhost:6500", { query: { type: "driver" } });
+ 
 
-const socket = io("/users", { query: { type: "client" } });
-const socketDrivers = io("/drivers", { query: { type: "driver" } })
+const socket = io("http://localhost:7000/users", { query: { type: "client" } });
+const socketDrivers = io("http://localhost:7000/drivers", { query: { type: "driver" } });
 
 
 let fileURL;
@@ -85,6 +84,48 @@ btnrRegisterUser.addEventListener("click", () => {
     let username = txtUserNickName.value.trim();
     socket.emit("register", username);
   }
+});
+
+
+socketDrivers.on("login", () => {
+  alert(
+    "¡Bienvenido " +
+      txtUserNickName.value.trim() +
+      "!\nRecuerda, respetar a los demás usuarios."
+  );
+  formLogin.style.display = "none";
+  formContentChat.style.display = "flex";
+  formShowUsers.style.display = "block";
+  formChatGrupal.style.display = "block";
+});
+
+socketDrivers.on("userExists", () => {
+  alert(
+    "El nickname: " +
+      txtUserNickName.value.trim() +
+      " ya está en uso, intenta con otro."
+  );
+  txtUserNickName.value = "";
+});
+
+socketDrivers.on("activeSessions", (users) => {
+  printUsersActive.innerHTML = "";
+  for (const user in users) {
+    printUsersActive.insertAdjacentHTML("beforeend", `<li>${user}</li>`);
+  }
+});
+
+socketDrivers.on("sendMessage", ({ message, user, image }) => {
+  printMessages.insertAdjacentHTML(
+    "beforeend",
+    `<div class="message frnd_message"><p>${message}<br /><span>${user}</span></p></div>`
+  );
+  if (image !== undefined) {
+    const imagen = document.createElement("img");
+    imagen.src = image;
+    printMessages.appendChild(imagen);
+  }
+  printMessages.scrollTop = printMessages.scrollHeight;
 });
 
 btnSendMessage.addEventListener("click", () => {

@@ -60,7 +60,7 @@ userNamespace.on("connection", (socket) => {
         image,
       });
     } else {
-      // Puedes emitir un evento de error en lugar de usar alert en el servidor
+       
       socket.emit("error", "El usuario al que intentas enviar el mensaje no existe!");
     }
   });
@@ -104,7 +104,7 @@ driverNamespace.on("connection", (socketDrivers) => {
         image,
       });
     } else {
-      // Puedes emitir un evento de error en lugar de usar alert en el servidor
+     
       socketDrivers.emit("error", "El conductor al que intentas enviar el mensaje no existe!");
     }
   });
